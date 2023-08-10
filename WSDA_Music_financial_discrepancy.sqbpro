@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/valeriakyriakides/Downloads/Nashvile Data Cleaning.db" readonly="0" foreign_keys="" case_sensitive_like="" temp_store="" wal_autocheckpoint="" synchronous=""/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="423"/><column_width id="4" width="0"/></tab_structure><tab_browse><current_table name="0,0:"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1">/*
-CREATED BY : VALERIA KYRIAKIDES
+/*CREATED BY : VALERIA KYRIAKIDES
 CREATE DATE 08/08/2023
 Discrepancy found in company's financials. Discrepancy occured between years 2011 and 2012. 
 Comapny believes missing funds can be attributed to a person. */
@@ -12,7 +11,7 @@ SELECT
 FROM
 	Invoice 
 WHERE
-InvoiceDate &gt;= '2011-01-01 00:00:00'  AND InvoiceDate &lt;='2012-12-31 00:00:00';
+InvoiceDate >= '2011-01-01 00:00:00'  AND InvoiceDate <='2012-12-31 00:00:00';
 
 --How much revenue was earned between 2011 and 2012?
 --$1947.97
@@ -21,7 +20,7 @@ SELECT
 FROM
 	Invoice
 WHERE
-	InvoiceDate &gt;='2011-01-01 00:00:00'  AND InvoiceDate &lt;='2012-12-31 00:00:00';
+	InvoiceDate >='2011-01-01 00:00:00'  AND InvoiceDate <='2012-12-31 00:00:00';
 
 	
 	/* The following queries answer more targeted questions with tables that contain data about customers and employees */
@@ -36,7 +35,7 @@ INNER JOIN
 	Customer c
 ON i.CustomerId = c.CustomerId
 WHERE
-	InvoiceDate &gt;='2011-01-01 00:00:00'  AND InvoiceDate &lt;='2012-12-31 00:00:00'
+	InvoiceDate >='2011-01-01 00:00:00'  AND InvoiceDate <='2012-12-31 00:00:00'
 ORDER BY
 	i.total DESC;
 	
@@ -56,7 +55,7 @@ INNER JOIN
 	Employee e
 	ON e.EmployeeId = c.SupportRepId 
 WHERE
-	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' 
+	InvoiceDate >= '2011-01-01 00:00:00' AND InvoiceDate <='2012-12-31 00:00:00' 
 ORDER BY
 	i.total DESC;
 	
@@ -67,7 +66,7 @@ SELECT
 FROM
 	Invoice
 WHERE
-	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00'; 
+	InvoiceDate >= '2011-01-01 00:00:00' AND InvoiceDate <='2012-12-31 00:00:00'; 
 
 --Number of transactions above average transaction amount ($11.66): 26
 SELECT
@@ -81,9 +80,9 @@ WHERE
 			FROM
 				Invoice
 			WHERE
-				InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' )
+				InvoiceDate >= '2011-01-01 00:00:00' AND InvoiceDate <='2012-12-31 00:00:00' )
 AND
-	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' ;
+	InvoiceDate >= '2011-01-01 00:00:00' AND InvoiceDate <='2012-12-31 00:00:00' ;
 
 --What is the average transaction amount for each year that the company has been in business? 
 -- 2009: $5.42
@@ -118,9 +117,9 @@ INNER JOIN
 	Employee e
 ON e.EmployeeId  = c.SupportRepId
 WHERE
-	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' 
+	InvoiceDate >= '2011-01-01 00:00:00' AND InvoiceDate <='2012-12-31 00:00:00' 
 AND 
-	i.total &gt; 11.66
+	i.total > 11.66
 GROUP BY
 	e.FirstName,
 	e.LastName
@@ -145,7 +144,7 @@ INNER JOIN
 	Employee e
 ON E.EmployeeId = C.SupportRepId
 WHERE
-	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' 
+	InvoiceDate >= '2011-01-01 00:00:00' AND InvoiceDate <='2012-12-31 00:00:00' 
 GROUP BY
 	e.FirstName,
 	e.LastName
@@ -172,7 +171,7 @@ INNER JOIN
 	Employee e
 ON e.EmployeeId = c.SupportRepId
 WHERE
-	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' 
+	InvoiceDate >= '2011-01-01 00:00:00' AND InvoiceDate <='2012-12-31 00:00:00' 
 	AND e.LastName = 'Peacock'
 GROUP BY
 	c.FirstName,
@@ -192,10 +191,5 @@ FROM
 WHERE	
 	LastName = 'Doeein'
 --No address, city, state, country, postal code, fax, email or phone listed for Customer
---It can be conlcuded that Jane Peacock is the primary person of interest</sql><sql name="SQL 2">/* CREATED BY VALERIA KYRIAKIDES
-CREATE DATE: 08/08/2023
-Clean raw housing data and transform it in order to make it more usable for analysis
-*/
+--It can be conlcuded that Jane Peacock is the primary person of interest
 
-SELECT *
-FROM PortfolioProject</sql><current_tab id="1"/></tab_sql></sqlb_project>
