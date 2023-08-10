@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/valeriakyriakides/Downloads/Nashvile Data Cleaning.db" readonly="0" foreign_keys="" case_sensitive_like="" temp_store="" wal_autocheckpoint="" synchronous=""/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="423"/><column_width id="4" width="0"/></tab_structure><tab_browse><current_table name="0,0:"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1">/*
+CREATED BY : VALERIA KYRIAKIDES
+CREATE DATE 08/08/2023
+Discrepancy found in company's financials. Discrepancy occured between years 2011 and 2012. 
+Comapny believes missing funds can be attributed to a person. */
+
+/* The following are general queries that give high-level context*/
+--How many transactions took place between 2011 and 2012?
+--167
+SELECT
+	COUNT(*) 
+FROM
+	Invoice 
+WHERE
+InvoiceDate &gt;= '2011-01-01 00:00:00'  AND InvoiceDate &lt;='2012-12-31 00:00:00';
+
+--How much revenue was earned between 2011 and 2012?
+--$1947.97
+SELECT
+	sum(total)
+FROM
+	Invoice
+WHERE
+	InvoiceDate &gt;='2011-01-01 00:00:00'  AND InvoiceDate &lt;='2012-12-31 00:00:00';
+
+	
+	/* The following queries answer more targeted questions with tables that contain data about customers and employees */
+-- Customers who made purchases between 2011 and 2012
+SELECT
+	c.FirstName,
+	c.LastName,
+	i.total
+FROM
+	Invoice i 
+INNER JOIN
+	Customer c
+ON i.CustomerId = c.CustomerId
+WHERE
+	InvoiceDate &gt;='2011-01-01 00:00:00'  AND InvoiceDate &lt;='2012-12-31 00:00:00'
+ORDER BY
+	i.total DESC;
+	
+-- Total transaction amount with customer name, sales rep name for purchases made between 2011 and 2012
+SELECT
+	c.FirstName AS [Customer FN],
+	c.LastName AS [Customer LN], 
+	e.FirstName AS [Employee FN], 
+	e.LastName AS [Employee LN], 
+	i.total
+FROM
+	Invoice i
+INNER JOIN 
+	Customer c
+	ON i.CustomerId = c.CustomerId 
+INNER JOIN
+	Employee e
+	ON e.EmployeeId = c.SupportRepId 
+WHERE
+	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' 
+ORDER BY
+	i.total DESC;
+	
+--How many transactions are above the average transaction amount between 2011 and 2012?
+--average transaction amount: $11.66
+SELECT
+	round(avg(total),2) AS [Avg Transaction Amount]
+FROM
+	Invoice
+WHERE
+	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00'; 
+
+--Number of transactions above average transaction amount ($11.66): 26
+SELECT
+	Count(total) AS [Num of Transactions Above Avg]
+FROM
+	Invoice
+WHERE
+	total &gt; 
+		( SELECT
+				round(avg(total),2) AS [Avg Transaction Amount]
+			FROM
+				Invoice
+			WHERE
+				InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' )
+AND
+	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' ;
+
+--What is the average transaction amount for each year that the company has been in business? 
+-- 2009: $5.42
+--2010: $5.80
+--2011: $17.51
+--2012: $5.75
+--2013: $5.63
+SELECT
+	round(avg(total),2) AS [Avg Transaction Amount],
+	strftime('%Y',InvoiceDate) AS [Year]
+FROM
+	Invoice
+GROUP BY 
+	strftime('%Y', InvoiceDate);
+	
+
+	/* The following queries perform in-depth analysis with the aim of finding employees who may have been financially motivated to commit a crime. */
+--List of employees who exceeded the average transaction amount from sales they generated between 2011 and 2012:
+-- Steve Johnson - Total Sales: $100.10
+--Margaret Park - Total Sales: $139.74
+--Jane Peacock - Total Sales: $1137.65 
+SELECT
+	E.FirstName,
+	e.LastName,
+	sum(i.total) AS [Total Sales]
+FROM
+	Invoice i 
+INNER JOIN
+	Customer c
+ON  i.CustomerId = c.CustomerId
+INNER JOIN
+	Employee e
+ON e.EmployeeId  = c.SupportRepId
+WHERE
+	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' 
+AND 
+	i.total &gt; 11.66
+GROUP BY
+	e.FirstName,
+	e.LastName
+ORDER BY
+	e.LastName;
+	
+--Employee's commission based on 15% of the sales transaction amount
+--Steven Johnson - commission payout: $43.98
+--Margaret Park - commission payout : $48.45
+--Jane Peacock - commission payout: $199.77
+SELECT
+	e.FirstName,
+	e.LastName,
+	sum(i.total) AS [Total Sales],
+	round(sum(i.total)*.15,2) AS [Comission Payout]
+FROM
+	Invoice i 
+INNER JOIN
+	Customer c
+ON I.CustomerId = C.CustomerId
+INNER JOIN
+	Employee e
+ON E.EmployeeId = C.SupportRepId
+WHERE
+	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' 
+GROUP BY
+	e.FirstName,
+	e.LastName
+ORDER BY
+	e.LastName;
+	
+--Employee that made the highest comission
+--Jane Peaccok: $199.77
+
+--Customers Jane Peacock supported
+SELECT
+	c.FirstName AS [Customer FN],
+	c.LastName AS [Customer LN],
+	e.FirstName AS [Employee FN],
+	e.LastName AS [Employee LN],
+	sum(i.total) AS [Total Sales],
+	round(sum(i.total)*.15,2) AS [Comission Payout]
+FROM 
+	Invoice i 
+INNER JOIN
+	Customer c
+ON i.CustomerId = c.CustomerId
+INNER JOIN
+	Employee e
+ON e.EmployeeId = c.SupportRepId
+WHERE
+	InvoiceDate &gt;= '2011-01-01 00:00:00' AND InvoiceDate &lt;='2012-12-31 00:00:00' 
+	AND e.LastName = 'Peacock'
+GROUP BY
+	c.FirstName,
+	c.LastName,
+	e.FirstName,
+	e.LastName
+ORDER BY [Total Sales] DESC;
+
+--Which customer made the highest purchase?
+--John Doeein: total sales of $1000.86 and commission payout of $150.13
+
+--Info about John Doeein
+SELECT 
+	*
+FROM 
+	Customer 
+WHERE	
+	LastName = 'Doeein'
+--No address, city, state, country, postal code, fax, email or phone listed for Customer
+--It can be conlcuded that Jane Peacock is the primary person of interest</sql><sql name="SQL 2">/* CREATED BY VALERIA KYRIAKIDES
+CREATE DATE: 08/08/2023
+Clean raw housing data and transform it in order to make it more usable for analysis
+*/
+
+SELECT *
+FROM PortfolioProject</sql><current_tab id="1"/></tab_sql></sqlb_project>
