@@ -1,5 +1,5 @@
 /* CREATED BY VALERIA KYRIAKIDES
-CREATE DATE: 104/2023
+CREATE DATE: 10/04/2023
 Analyze customer and sales data to gain insights by querying a database with multiple tables in it and quantifying statistics.
 */
 
@@ -29,7 +29,7 @@ FROM
 WHERE
     LENGTH(orderid) = 6;
     
--- How mant orders were placed in january?
+-- How many orders were placed in january?
 SELECT
     COUNT(*)
 FROM
@@ -125,8 +125,7 @@ WHERE
 -- List all the products sold in Los Angeles in February, and include how many of each were sold
 SELECT
     product,
-    sum(quantity),
-    location
+    sum(quantity)
 FROM
     BIT_DB.FebSales
 WHERE
