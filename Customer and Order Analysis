@@ -161,19 +161,6 @@ GROUP BY
     product;
     
 
--- What was the average quantity of products purchased per account in February?
-SELECT
-   AVG(fs.quantity*fs.price)
-FROM    
-    BIT_DB.FebSales fs
-OUTER JOIN
-    BIT_DB.customers c
-ON 
-    fs.orderid = c.order_id
-WHERE
-    length(fs.orderid)=6;
-    
-
 -- What was the average quantity of products purchased per account in february?
 SELECT
     SUM(fs.quantity)/COUNT(c.acctnum)
