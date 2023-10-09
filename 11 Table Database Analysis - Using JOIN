@@ -1,0 +1,326 @@
+/* CREATED BY VALERIA KYRIAKIDES
+CREATE DATE: 10/09/2023
+Query a database with 11 tables to gain insights on a digital media store
+*/
+
+-- Show customers who are not in the U.S.
+-- include their full names, customer ID and country
+SELECT
+    firstname,
+    lastname,
+    customerid,
+    country
+FROM
+    chinook.customers
+WHERE
+    country <> 'USA';
+    
+
+-- Show customers from brazil
+SELECT
+    firstname,
+    lastname,
+    country
+FROM
+    chinook.customers
+WHERE
+    country = 'Brazil';
+    
+
+-- Find the invoices of customers who are from Brazil.
+-- Include the customer's full name, invoice id, date of invoice, and billing country
+SELECT    
+    c.firstname as cust_FirstName,
+    c.lastname as cust_LastName,
+    i.invoiceid as invoiceid,
+    DATE(i.invoicedate) as InvoiceDate,
+    c.country as BillingCountry
+FROM
+    chinook.customers c
+JOIN
+    chinook.invoices i
+ON
+    c.customerid = i.customerid;
+    
+
+-- Which employees are sales agents?
+SELECT
+    firstname,
+    lastname,
+    title
+FROM
+    chinook.employees
+WHERE
+    title LIKE '%Sales% Agent%';
+    
+
+-- Find a unique list of billing countries from the Invoice table
+SELECT
+    DISTINCT(BillingCountry)
+FROM
+    chinook.invoices;
+    
+
+-- Show the invoices associated with each sales agent. Include the sales agent's full name.
+SELECT
+    e.firstname as employee_FirstName,
+    e.lastname as employee_LastName,
+    i.invoiceid as InvoiceID,
+    c.customerid as CustomerID
+FROM
+    chinook.employees e
+JOIN
+    chinook.customers c
+ON
+    e.employeeid = c.supportrepid
+JOIN
+    chinook.invoices i
+ON
+    i.customerid = c.customerid;
+    
+
+-- List the invoice total, customer name, country, and sales agent name for all invoices and customers.
+SELECT
+    i.total as InvoiceTotal,
+    c.firstname as cust_FirstName,
+    c.lastname as cust_LastName,
+    i.Billingcountry as Country,
+    e.firstname as emp_FirstName,
+    e.lastname as emp_LastName
+FROM
+    chinook.invoices i
+JOIN
+    chinook.customers c
+ON     
+    i.customerid = c.customerid
+JOIN
+    chinook.employees e
+ON
+    e.employeeid = c.supportrepid;
+    
+
+-- How many invoices were there in 2009?
+SELECT
+    COUNT(*)
+FROM
+    chinook.invoices
+WHERE
+    invoicedate LIKE '%2009%';
+    
+
+-- What are the total sales for 2009?
+SELECT
+    ROUND(SUM(total), 2)
+FROM
+    chinook.invoices
+WHERE
+    invoicedate LIKE '%2009%';
+    
+
+-- List the purchased track name with each invoice line id
+SELECT
+   t.name as track_name,
+   i.invoicelineid as InvoiceLineID
+FROM
+    chinook.invoice_items i
+JOIN
+    chinook.tracks t
+ON 
+    i.trackid = t.trackid; 
+    
+
+-- List the pruchased track name and artist name with each invoice line id
+SELECT
+    t.name as TrackName,
+    ar.name as ArtistName,
+    i.invoicelineid as InvoiceLineID
+FROM
+    chinook.invoice_items i
+JOIN
+    chinook.tracks t
+ON 
+    i.trackid = t.trackid
+JOIN
+    chinook.albums a
+ON
+    a.albumid = t.albumid
+JOIN
+    chinook.artists ar
+ON 
+    a.artistid = ar.artistid;
+    
+
+-- List all the tracks with the album name, media type, and genre
+SELECT
+    t.name as TrackName,
+    a.Title as AlbumName,
+    m.Name as MediaType,
+    g.name as Genre
+FROM
+    chinook.tracks t
+JOIN
+    chinook.albums a
+ON
+    t.albumid = a.albumid
+JOIN
+    chinook.media_types m
+ON
+    t.mediatypeid = m.mediatypeid
+JOIN
+    chinook.genres g
+ON
+    t.genreid = g.genreid;
+    
+
+-- What was the total sales made by each sales agent?
+SELECT
+    e.firstname as FirstName,
+    e.lastname as LastName,
+   ROUND(SUM(i.total), 2) as TotalSales
+FROM
+    chinook.employees e
+JOIN
+    chinook.customers c
+ON 
+    e.employeeid = c.supportrepid
+JOIN
+    chinook.invoices i
+ON
+    c.customerid = i.customerid
+GROUP BY
+    e.lastname;
+
+
+-- Which sales agent made the most dollars in sales in 2009?
+SELECT
+    e.firstname as FirstName,
+    e.lastname as LastName,
+    ROUND(SUM(i.total), 2) as TotalSales
+FROM
+    chinook.employees e
+JOIN
+    chinook.customers c
+ON
+    e.employeeid = c.supportrepid
+JOIN
+    chinook.invoices i 
+ON
+    c.customerid = i.customerid
+WHERE
+    i.invoicedate LIKE '%2009%'
+GROUP BY
+    e.lastname
+ORDER BY
+    TotalSales DESC;
+    
+
+-- Which artist has brought in the most dollars in sales?
+SELECT
+    ar.name as ArtistName,
+    ROUND(SUM(i.total), 2) as TotalSales
+FROM
+    chinook.artists ar
+JOIN
+    chinook.albums a
+ON
+    ar.artistid = a.artistid
+JOIN
+    chinook.tracks t
+ON
+    a.albumid = t.albumid
+JOIN
+    chinook.invoice_items ii
+ON
+    ii.trackid = t.trackid
+JOIN
+    chinook.invoices i
+ON
+    i.invoiceid = ii.invoiceid
+GROUP BY
+    ar.name
+ORDER BY 
+    TotalSales DESC;
+    
+
+-- List the playlist that each track belongs to
+SELECT
+    t.name as TrackName,
+    p.name as PlayList
+FROM
+    chinook.tracks t
+JOIN
+    chinook.playlist_track pt
+ON
+    t.trackid = pt.trackid
+JOIN
+    chinook.playlists p
+ON
+    pt.playlistid = p.playlistid;
+    
+
+-- How many tracks does each playlist have?
+SELECT
+    p.name as PlaylistName,
+    COUNT(pt.trackid) as TrackCount
+FROM
+    chinook.playlists p
+JOIN
+    chinook.playlist_track pt
+ON
+    p.playlistid = pt.playlistid
+GROUP BY 
+    PlaylistName;
+    
+
+-- how many tracks does each genre have?
+SELECT
+    g.name as Genre,
+    COUNT(t.trackid) as TrackCount
+FROM
+    chinook.genres g
+JOIN
+    chinook.tracks t
+ON
+    g.genreid = t.genreid
+GROUP BY
+    Genre;
+
+
+-- How many dollars in sales has each customer from the U.S. brought in?
+SELECT
+    c.firstname as FirstName,
+    c.lastname as LastName,
+    ROUND(SUM(i.total), 2) as TotalSales
+FROM
+    chinook.customers c
+JOIN
+    chinook.invoices i
+ON
+    c.customerid = i.customerid
+WHERE
+    c.country = 'USA'
+GROUP BY
+    c.lastname;
+    
+    
+-- Which country has the most customers?
+SELECT
+    COUNT(customerid) as CustomerCount,
+    Country
+FROM
+    chinook.customers
+GROUP BY
+    country
+ORDER BY
+    CustomerCount DESC;
+    
+
+-- Which employees were hired most recently?
+SELECT
+    firstname,
+    lastname,
+    DATE(hiredate) as DateHired
+FROM
+    chinook.employees
+ORDER BY
+    DateHired DESC;
